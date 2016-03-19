@@ -7,7 +7,6 @@ __all__ = ["Expression"]
 _LEFT_OPERATOR = {
     '__add__': '%s+(%s)',
     '__and__': '%s&(%s)',
-    '__div__': '%s/(%s)',
     '__eq__': '%s==(%s)',
     '__floordiv__': '%s//(%s)',
     '__ge__': '%s>=(%s)',
@@ -27,10 +26,10 @@ _LEFT_OPERATOR = {
     '__xor__': '%s^(%s)',
 }
 
+
 _RIGHT_OPERATOR = {
     '__radd__': '(%s)+%s',
     '__rand__': '(%s)&%s',
-    '__rdiv__': '(%s)/%s',
     '__rfloordiv__': '(%s)//%s',
     '__rlshift__': '(%s)<<%s',
     '__rmatmul__': '(%s)@%s',
@@ -44,27 +43,25 @@ _RIGHT_OPERATOR = {
     '__rxor__': '(%s)^%s',
 }
 
+
 _UNARY_OPERATOR = {
     '__invert__': '~(%s)',
     '__neg__': '-(%s)',
     '__pos__': '+(%s)',
 }
 
+
 _BUILT_IN_FUNCTIONS = {
     '__abs__': 'abs(%s%s%s)',
     '__round__': 'round(%s%s%s)',
     '__reversed__': 'reversed(%s%s%s)',
 
-    # FIXME: folowing methods did not work. View FailedExpressionBehaviours
-    # class in the tests/test_suger.py module.
-
     # '__len__': 'len(%s%s%s)',
+    # '__iter__': 'iter(%s%s%s)',
+    # '__contains__': 'contains(%s%s%s)',
     # '__instancecheck__': 'isinstance(%s%s%s)',
     # '__subclasscheck__': 'issubclass(%s%s%s)',
-    # '__contains__': 'contains(%s%s%s)',
-    # '__iter__': 'iter(%s%s%s)',
 
-    # TODO:
     # '__bytes__': 'bytes(%s%s%s)',
     # '__format__': 'format(%s%s%s)',
     # '__hash__': 'hash(%s%s%s)',
@@ -80,8 +77,11 @@ def _left_operator(template):
     string with a binary left operator.
     """
     def operator(self, other):
+        """Store an string in the self.__expr__ attribute that
+        represent a binary left operator.
+        """
         result = Expression("")
-        if hasattr(other, '__expr__'):
+        if hasattr(other, "__expr__"):
             result.__expr__ = template % (self.__expr__, other.__expr__)
         else:
             result.__expr__ = template % (self.__expr__, repr(other))
@@ -94,8 +94,11 @@ def _right_operator(template):
     an binary operator placed at the right of the variable.
     """
     def operator(self, other):
+        """Store an string in the self.__expr__ attribute that
+        represent a binary righ operator.
+        """
         result = Expression("")
-        if hasattr(other, '__expr__'):
+        if hasattr(other, "__expr__"):
             result.__expr__ = template % (other.__expr__, self.__expr__)
         else:
             result.__expr__ = template % (repr(other), self.__expr__)
@@ -108,19 +111,23 @@ def _unary_operator(template):
     expression string with an unary operator.
     """
     def operator(self):
+        """Store an string in the self.__expr__ attribute
+        that represent a unary operator.
+        """
         result = Expression("")
         result.__expr__ = template % self.__expr__
         return result
     return operator
 
 
-# The __call__ method difer of the other special methods in the serparator
-# variable. So, I add such variable as default argument.
 def _built_in_function(template, separator=', '):
     """Return a function that make an
     expression with an built in function.
     """
     def function(self, *args, **kwds):
+        """Store an string in the self.__expr__ attribute
+        that represent a builtin function.
+        """
         formated_kwds, formated_args = "", ""
         if args != ():
             formated_args = separator + repr(args)[1:][:-2]
@@ -138,16 +145,19 @@ class _Operators(type):
     """All operators of the new class will
     return an instance of the Expression class.
     """
-    def __new__(cls, name, bases, namespace):
-        namespace.update({function: _left_operator(template) for
-                          function, template in _LEFT_OPERATOR.items()})
-        namespace.update({function: _right_operator(template) for
-                          function, template in _RIGHT_OPERATOR.items()})
-        namespace.update({function: _unary_operator(template) for
-                          function, template in _UNARY_OPERATOR.items()})
-        namespace.update({function: _built_in_function(template) for
-                          function, template in _BUILT_IN_FUNCTIONS.items()})
-        new_class = super().__new__(cls, name, bases, namespace)
+    def __new__(mcs, name, bases, namespace):
+        new_namespace = {
+            **namespace,
+            **{function: _left_operator(template) for function, template in
+               _LEFT_OPERATOR.items()},
+            **{function: _right_operator(template) for function, template in
+               _RIGHT_OPERATOR.items()},
+            **{function: _unary_operator(template) for function, template in
+               _UNARY_OPERATOR.items()},
+            **{function: _built_in_function(template) for function, template in
+               _BUILT_IN_FUNCTIONS.items()}
+        }
+        new_class = super().__new__(mcs, name, bases, new_namespace)
         return new_class
 
 
@@ -155,7 +165,7 @@ class Expression(metaclass=_Operators):
     """Create an object that store all
     math operations in which it is involved.
     """
-    def __init__(self, name, bases=()):
+    def __init__(self, name):
         self.__expr__ = name
 
     def __repr__(self):

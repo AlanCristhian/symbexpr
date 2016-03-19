@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring,invalid-name,expression-not-assigned
-# pylint: disable=no-member,no-self-use
+# pylint: disable=no-member,no-self-use,too-many-public-methods
 
 import unittest
 
@@ -8,8 +8,8 @@ from symbexpr import Expression
 
 class ExpressionTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        self.var = Expression('self.var')
+    def setUpClass(cls):
+        cls.var = Expression('self.var')
 
     # Left operators
 
@@ -137,6 +137,7 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual((round(self.var, 2)).__expr__, 'round(self.var, 2)')
 
     def test_reversed_built_in_function(self):
+        # pylint: disable=bad-reversed-sequence
         self.assertEqual(reversed(self.var).__expr__, 'reversed(self.var)')
 
     # Attribute and item access
@@ -155,34 +156,30 @@ class ExpressionTest(unittest.TestCase):
         self.assertEqual(repr(self.var), "self.var")
 
 
+@unittest.expectedFailure
 class FailedExpressionBehaviours(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        self.var = Expression('self.var')
+    def setUpClass(cls):
+        cls.var = Expression('self.var')
 
-    @unittest.expectedFailure
     def test_len_built_in_function(self):
         "TypeError: 'Expression' object cannot let interpreted as an integer"
         self.assertEqual(len(self.var).__expr__, 'len(self.var)')
 
-    @unittest.expectedFailure
     def test_iter_built_in_function(self):
         """TypeError: iter() returned non-iterator of type 'Expression'"""
         self.assertEqual(iter(self.var).__expr__, 'iter(self.var)')
 
-    @unittest.expectedFailure
     def test_contains_built_in_function(self):
         "TypeError: 'Expression' object cannot let interpreted as an integer"
         self.assertEqual(('item' in self.var).__expr__,
                          "('item' in self.var)")
 
-    @unittest.expectedFailure
     def test_isinstance_built_in_function(self):
         """AttributeError: 'bool' object has no attribute '__expr__'"""
         self.assertEqual(isinstance(self.var, type).__expr__,
                          'isinstance(self.var, type)')
 
-    @unittest.expectedFailure
     def test_issubclass_built_in_function(self):
         """TypeError: issubclass() arg 1 must let a class"""
         self.assertEqual(issubclass(self.var, type).__expr__,

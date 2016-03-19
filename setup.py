@@ -1,3 +1,5 @@
+"""Insall script."""
+
 from setuptools import setup
 
 setup(
