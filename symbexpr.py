@@ -61,7 +61,6 @@ _BUILT_IN_FUNCTIONS = {
     # '__contains__': 'contains(%s%s%s)',
     # '__instancecheck__': 'isinstance(%s%s%s)',
     # '__subclasscheck__': 'issubclass(%s%s%s)',
-
     # '__bytes__': 'bytes(%s%s%s)',
     # '__format__': 'format(%s%s%s)',
     # '__hash__': 'hash(%s%s%s)',
@@ -132,12 +131,10 @@ def _built_in_function(template, separator=', '):
         if args != ():
             formated_args = separator + repr(args)[1:][:-2]
         if kwds != {}:
-            add_equal = ('%s=%r' % (key, value) for key, value in kwds.items())
+            add_equal = (f'{key}={value}' for key, value in kwds.items())
             formated_kwds = ', ' + ', '.join(add_equal)
-        result = Expression("")
-        result.__expr__ = template % (self.__expr__, formated_args,
-                                      formated_kwds)
-        return result
+        return Expression(
+            template % (self.__expr__, formated_args, formated_kwds))
     return function
 
 
@@ -172,14 +169,10 @@ class Expression(metaclass=_Operators):
         return self.__expr__
 
     def __getattr__(self, attr):
-        result = Expression("")
-        result.__expr__ = '(%s).%s' % (self.__expr__, attr)
-        return result
+        return Expression(f'({self.__expr__}).{attr}')
 
     def __getitem__(self, attr):
-        result = Expression("")
-        result.__expr__ = '(%s)[%r]' % (self.__expr__, attr)
-        return result
+        return Expression(f'({self.__expr__})[{attr!r}]')
 
     def __hash__(self):
         return hash(self.__expr__)
