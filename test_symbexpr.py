@@ -19,9 +19,6 @@ class ExpressionTest(unittest.TestCase):
     def test_left_and_operator(self):
         self.assertEqual((self.var & 2).__expr__, 'self.var&(2)')
 
-    def test_left_div_operator(self):
-        self.assertEqual((self.var / 2).__expr__, 'self.var/(2)')
-
     def test_left_eq_operator(self):
         self.assertEqual((self.var == 2).__expr__, 'self.var==(2)')
 
@@ -80,9 +77,6 @@ class ExpressionTest(unittest.TestCase):
 
     def test_right_rand_operator(self):
         self.assertEqual((2 & self.var).__expr__, '(2)&self.var')
-
-    def test_right_rdiv_operator(self):
-        self.assertEqual((2 / self.var).__expr__, '(2)/self.var')
 
     def test_rflooright_rfloordiv_operator(self):
         self.assertEqual((2 // self.var).__expr__, '(2)//self.var')
@@ -154,36 +148,6 @@ class ExpressionTest(unittest.TestCase):
 
     def test__repr__method(self):
         self.assertEqual(repr(self.var), "self.var")
-
-
-@unittest.expectedFailure
-class FailedExpressionBehaviours(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.var = Expression('self.var')
-
-    def test_len_built_in_function(self):
-        "TypeError: 'Expression' object cannot let interpreted as an integer"
-        self.assertEqual(len(self.var).__expr__, 'len(self.var)')
-
-    def test_iter_built_in_function(self):
-        """TypeError: iter() returned non-iterator of type 'Expression'"""
-        self.assertEqual(iter(self.var).__expr__, 'iter(self.var)')
-
-    def test_contains_built_in_function(self):
-        "TypeError: 'Expression' object cannot let interpreted as an integer"
-        self.assertEqual(('item' in self.var).__expr__,
-                         "('item' in self.var)")
-
-    def test_isinstance_built_in_function(self):
-        """AttributeError: 'bool' object has no attribute '__expr__'"""
-        self.assertEqual(isinstance(self.var, type).__expr__,
-                         'isinstance(self.var, type)')
-
-    def test_issubclass_built_in_function(self):
-        """TypeError: issubclass() arg 1 must let a class"""
-        self.assertEqual(issubclass(self.var, type).__expr__,
-                         'issubclass(self.var, type)')
 
 
 if __name__ == '__main__':
