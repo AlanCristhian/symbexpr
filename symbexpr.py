@@ -55,19 +55,6 @@ _BUILT_IN_FUNCTIONS = {
     '__abs__': 'abs(%s%s%s)',
     '__round__': 'round(%s%s%s)',
     '__reversed__': 'reversed(%s%s%s)',
-
-    # '__len__': 'len(%s%s%s)',
-    # '__iter__': 'iter(%s%s%s)',
-    # '__contains__': 'contains(%s%s%s)',
-    # '__instancecheck__': 'isinstance(%s%s%s)',
-    # '__subclasscheck__': 'issubclass(%s%s%s)',
-    # '__bytes__': 'bytes(%s%s%s)',
-    # '__format__': 'format(%s%s%s)',
-    # '__hash__': 'hash(%s%s%s)',
-    # '__bool__': 'bool(%s%s%s)',
-    # '__setattr__': 'setattr(%s%s%s)',
-    # '__delattr__': 'delattr(%s%s%s)',
-    # '__dir__': 'dir(%s%s%s)',
 }
 
 
@@ -79,12 +66,10 @@ def _left_operator(template):
         """Store an string in the self.__expr__ attribute that
         represent a binary left operator.
         """
-        result = Expression("")
         if hasattr(other, "__expr__"):
-            result.__expr__ = template % (self.__expr__, other.__expr__)
+            return Expression(template % (self.__expr__, other.__expr__))
         else:
-            result.__expr__ = template % (self.__expr__, repr(other))
-        return result
+            return Expression(template % (self.__expr__, repr(other)))
     return operator
 
 
@@ -96,12 +81,10 @@ def _right_operator(template):
         """Store an string in the self.__expr__ attribute that
         represent a binary righ operator.
         """
-        result = Expression("")
         if hasattr(other, "__expr__"):
-            result.__expr__ = template % (other.__expr__, self.__expr__)
+            return Expression(template % (other.__expr__, self.__expr__))
         else:
-            result.__expr__ = template % (repr(other), self.__expr__)
-        return result
+            return Expression(template % (repr(other), self.__expr__))
     return operator
 
 
@@ -113,9 +96,7 @@ def _unary_operator(template):
         """Store an string in the self.__expr__ attribute
         that represent a unary operator.
         """
-        result = Expression("")
-        result.__expr__ = template % self.__expr__
-        return result
+        return Expression(template % self.__expr__)
     return operator
 
 
